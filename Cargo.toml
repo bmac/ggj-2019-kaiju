@@ -1,0 +1,12 @@
+[package]
+name = "qs"
+version = "0.1.0"
+authors = ["bmac <bmac325@GMail.com>"]
+edition = "2018"
+
+[dependencies]
+quicksilver = "*"
+image = "*"
+immi = "*"
+nalgebra = "*"
+ncollide2d = "*"

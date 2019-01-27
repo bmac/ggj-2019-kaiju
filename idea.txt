@@ -1,0 +1,43 @@
+You play as a kaiju which is angry it doesn't have a home so you destory the homes in a city.
+
+
+Walk left right
+Space button to stomp feet.
+
+Buildings that are within XX pixels when stomping feet will sink into the ground.
+
+
+2d game, view scrolls left and right.
+
+built with wasm
+
+https://elthen.itch.io/monster-sprite-pack
+Golem looks like a good sprite
+
+
+
+https://www.gamedevmarket.net/asset/city-vector-background/
+City
+
+https://www.gamedevmarket.net/asset/houses-city-building-set-8858/
+Meh,
+
+https://www.gamedevmarket.net/asset/retro-city-background-7223/
+rectangle design
+
+https://www.gamedevmarket.net/asset/city-building-collection/
+good variety
+
+https://www.gamedevmarket.net/asset/city-buildings-10097/
+another rectangle one
+
+
+https://www.gamedevmarket.net/asset/neon-city/
+neon city soundtrack?
+
+
+
+
+
+
+
