@@ -6,7 +6,7 @@ use quicksilver::{
     Future,
     Result,
     geom::{Shape, Vector, Rectangle, Transform},
-    graphics::{Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
+    graphics::{Background, Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
     lifecycle::{Asset, Settings, State, Window, run}, // To load anything, we need Asset
     input::Key,
 };
@@ -28,6 +28,7 @@ enum MonsterState {
 struct Building {
     image: Asset<Image>,
     position: Vector,
+    splash_area: Rectangle,
 }
 
 struct Monster {
@@ -87,6 +88,7 @@ impl State for KaijuEngine {
         let building = Building {
             image,
             position: Vector::new(200, 450),
+            splash_area: Rectangle::new_sized((200, 300)).with_center((200, 450))
         };
 
         Ok(KaijuEngine {
@@ -107,7 +109,11 @@ impl State for KaijuEngine {
             self.monster.facing = 1.0;
             self.monster.state = MonsterState::Walking;
         } else if window.keyboard()[Key::Space].is_down() {
-            self.building.position.y += 1.5;
+            let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
+            // maybe just use contains?
+            if self.building.splash_area.overlaps(&monster_rect) {
+                self.building.position.y += 1.5;
+            }
             self.monster.state = MonsterState::Attack;
         } else {
             self.monster.state = MonsterState::Idle;
@@ -135,7 +141,15 @@ impl State for KaijuEngine {
 
         let building_position = self.building.position;
         let pos_y = self.building.position.y;
-        let rotate = (pos_y - 50.0).sin() * 15;
+        let frequency = 0.5;
+        let rotate = ((pos_y - 450.0) * frequency).sin() * 2.0;
+
+        // let splash_area = self.building.splash_area;
+        // window.draw_ex(&splash_area, Background::Col(Color::BLUE), Transform::IDENTITY, 100);
+        // let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
+        //window.draw_ex(&monster_rect, Background::Col(Color::GREEN), Transform::IDENTITY, 100);
+
+        
         self.building.image.execute(|image| {
             window.draw_ex(&image.area().with_center(building_position), Img(&image),
                            Transform::rotate(rotate),
