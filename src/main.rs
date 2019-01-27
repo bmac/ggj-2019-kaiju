@@ -1,15 +1,22 @@
 // Draw an image to the screen
 extern crate quicksilver;
-use std::f32;
 
 use quicksilver::{
-    Future,
     Result,
-    geom::{Shape, Vector, Rectangle, Transform, Scalar},
-    graphics::{Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
+    geom::{Shape, Vector, Rectangle, Transform},
+    graphics::{Background::Img, Color, Image}, // We need Image and image backgrounds
     lifecycle::{Asset, Settings, State, Window, run}, // To load anything, we need Asset
     input::Key,
 };
+
+mod monster;
+mod building;
+mod util;
+
+use monster::{MonsterState, Monster};
+use building::{Building};
+use util::{create_animation_asset};
+
 
 struct KaijuEngine {
     sky_background: Asset<Image>,
@@ -53,85 +60,6 @@ impl KaijuEngine {
 
         Ok(())
     }
-}
-
-enum MonsterState {
-    // An `enum` may either be `unit-like`,
-    Walking,
-    Idle,
-    Attack,
-}
-
-struct Building {
-    image: Asset<Image>,
-    position: Vector,
-    start_position: Vector,
-    splash_area: Rectangle,
-}
-
-impl Building {
-    fn new(file_name: &'static str, position: (impl Scalar, impl Scalar)) -> Building {
-        let splash_zone = (50, 300);
-        Building {
-            image: Asset::new(Image::load(file_name)),
-            start_position: Vector::new(position.0, position.1),
-            position: Vector::new(position.0, position.1),
-            splash_area: Rectangle::new_sized(splash_zone).with_center(position)
-        }
-    }
-}
-
-struct Monster {
-    walking_animation: Asset<Animation>,
-    idle_animation: Asset<Animation>,
-    attack_animation: Asset<Animation>,
-    state: MonsterState,
-    position: Vector,
-    facing: f32, // 1 or -1 so we can easily pass to scale
-}
-
-impl Monster {
-    fn render(&mut self, window: &mut Window) -> Result<()> {
-        let position = self.position;
-        let facing = self.facing;
-
-        // move to monster render method
-        let animation = match self.state {
-            MonsterState::Idle => &mut self.idle_animation,
-            MonsterState::Walking => &mut self.walking_animation,
-            MonsterState::Attack => &mut self.attack_animation,
-        };
-
-        animation.execute(|character_animation| {
-            let current_frame = character_animation.current_frame();
-            window.draw_ex(
-                &current_frame.area().with_center(position),
-                Img(&current_frame),
-                Transform::scale((facing, 1.0)),
-                100);
-            character_animation.tick();
-            Ok(())
-        })
-    }
-}
-
-
-fn create_animation_asset(file_name: &'static str, rows: usize) -> Asset<Animation> {
-
-    let mut animation_positions = vec![
-        Rectangle::new((0, 0), (249, 200)), Rectangle::new((249, 0), (249, 200)), Rectangle::new((498, 0), (249, 200)), Rectangle::new((747, 0), (249, 200)), Rectangle::new((996, 0), (249, 200)),
-        Rectangle::new((0, 200), (249, 200)), Rectangle::new((249, 200), (249, 200)), Rectangle::new((498, 200), (249, 200)), Rectangle::new((747, 200), (249, 200)), Rectangle::new((996, 200), (249, 200)),
-        Rectangle::new((0, 400), (249, 200)), Rectangle::new((249, 400), (249, 200)), Rectangle::new((498, 400), (249, 200)), Rectangle::new((747, 400), (249, 200)), Rectangle::new((996, 400), (249, 200)),
-        Rectangle::new((0, 600), (249, 200)), Rectangle::new((249, 600), (249, 200)), Rectangle::new((498, 600), (249, 200)), Rectangle::new((747, 600), (249, 200)), Rectangle::new((996, 600), (249, 200)),
-        Rectangle::new((0, 800), (249, 200)), Rectangle::new((249, 800), (249, 200)), Rectangle::new((498, 800), (249, 200)), Rectangle::new((747, 800), (249, 200)), Rectangle::new((996, 800), (249, 200)),
-    ];
-
-    animation_positions.truncate(5 * rows);
-
-    let character_image = Image::load(file_name).map(move |character_image| {
-        Animation::from_spritesheet(character_image.to_owned(), animation_positions, 4)
-    });
-    Asset::new(character_image)
 }
 
 impl State for KaijuEngine {
