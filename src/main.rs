@@ -1,5 +1,6 @@
 // Draw an image to the screen
 extern crate quicksilver;
+use std::f32;
 
 use quicksilver::{
     Future,
@@ -13,6 +14,7 @@ use quicksilver::{
 struct KaijuEngine {
     sky_background: Asset<Image>,
     city_background: Asset<Image>,
+    building: Building,
     monster: Monster,
 }
 
@@ -21,6 +23,11 @@ enum MonsterState {
     Walking,
     Idle,
     Attack,
+}
+
+struct Building {
+    image: Asset<Image>,
+    position: Vector,
 }
 
 struct Monster {
@@ -76,10 +83,17 @@ impl State for KaijuEngine {
         let sky_background = Asset::new(Image::load("sky.png"));
         let city_background = Asset::new(Image::load("city_background.png"));
 
+        let image = Asset::new(Image::load("building_1.png"));
+        let building = Building {
+            image,
+            position: Vector::new(200, 450),
+        };
+
         Ok(KaijuEngine {
             city_background,
             sky_background,
             monster,
+            building,
         })
     }
 
@@ -93,6 +107,7 @@ impl State for KaijuEngine {
             self.monster.facing = 1.0;
             self.monster.state = MonsterState::Walking;
         } else if window.keyboard()[Key::Space].is_down() {
+            self.building.position.y += 1.5;
             self.monster.state = MonsterState::Attack;
         } else {
             self.monster.state = MonsterState::Idle;
@@ -114,6 +129,17 @@ impl State for KaijuEngine {
 
         self.city_background.execute(|bg_image| {
             window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
+            Ok(())
+        })?;
+
+
+        let building_position = self.building.position;
+        let pos_y = self.building.position.y;
+        let rotate = (pos_y - 50.0).sin() * 15;
+        self.building.image.execute(|image| {
+            window.draw_ex(&image.area().with_center(building_position), Img(&image),
+                           Transform::rotate(rotate),
+            1);
             Ok(())
         })?;
 
