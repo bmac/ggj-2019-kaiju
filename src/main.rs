@@ -14,7 +14,7 @@ use quicksilver::{
 struct KaijuEngine {
     sky_background: Asset<Image>,
     city_background: Asset<Image>,
-    building: Building,
+    buildings: Vec<Building>,
     monster: Monster,
 }
 
@@ -43,30 +43,30 @@ struct Monster {
 
 fn create_animation_asset(file_name: &'static str, rows: usize) -> Asset<Animation> {
     // x, y
-        // let animation_positions = vec![
-        //     Rectangle::new((0, 0), (743, 596)), Rectangle::new((743, 0), (743, 596)), Rectangle::new((1486, 0), (743, 596)), Rectangle::new((2229, 0), (743, 596)), Rectangle::new((2972, 0), (743, 596)),
-        // Rectangle::new((0, 596), (743, 596)), Rectangle::new((743, 596), (743, 596)), Rectangle::new((1486, 596), (743, 596)), Rectangle::new((2229, 596), (743, 596)), Rectangle::new((2972, 596), (743, 596)),
-        // Rectangle::new((0, 1192), (743, 596)), Rectangle::new((743, 1192), (743, 596)), Rectangle::new((1486, 1192), (743, 596)), Rectangle::new((2229, 1192), (743, 596)), Rectangle::new((2972, 1192), (743, 596))
-        // ];
+    // let animation_positions = vec![
+    //     Rectangle::new((0, 0), (743, 596)), Rectangle::new((743, 0), (743, 596)), Rectangle::new((1486, 0), (743, 596)), Rectangle::new((2229, 0), (743, 596)), Rectangle::new((2972, 0), (743, 596)),
+    // Rectangle::new((0, 596), (743, 596)), Rectangle::new((743, 596), (743, 596)), Rectangle::new((1486, 596), (743, 596)), Rectangle::new((2229, 596), (743, 596)), Rectangle::new((2972, 596), (743, 596)),
+    // Rectangle::new((0, 1192), (743, 596)), Rectangle::new((743, 1192), (743, 596)), Rectangle::new((1486, 1192), (743, 596)), Rectangle::new((2229, 1192), (743, 596)), Rectangle::new((2972, 1192), (743, 596))
+    // ];
 
 
     // 249
     // 249 + 249 = 498 + 249 = 747 + 249 = 996
     // height 200
     let mut animation_positions = vec![
-            Rectangle::new((0, 0), (249, 200)), Rectangle::new((249, 0), (249, 200)), Rectangle::new((498, 0), (249, 200)), Rectangle::new((747, 0), (249, 200)), Rectangle::new((996, 0), (249, 200)),
+        Rectangle::new((0, 0), (249, 200)), Rectangle::new((249, 0), (249, 200)), Rectangle::new((498, 0), (249, 200)), Rectangle::new((747, 0), (249, 200)), Rectangle::new((996, 0), (249, 200)),
         Rectangle::new((0, 200), (249, 200)), Rectangle::new((249, 200), (249, 200)), Rectangle::new((498, 200), (249, 200)), Rectangle::new((747, 200), (249, 200)), Rectangle::new((996, 200), (249, 200)),
         Rectangle::new((0, 400), (249, 200)), Rectangle::new((249, 400), (249, 200)), Rectangle::new((498, 400), (249, 200)), Rectangle::new((747, 400), (249, 200)), Rectangle::new((996, 400), (249, 200)),
-            Rectangle::new((0, 600), (249, 200)), Rectangle::new((249, 600), (249, 200)), Rectangle::new((498, 600), (249, 200)), Rectangle::new((747, 600), (249, 200)), Rectangle::new((996, 600), (249, 200)),
+        Rectangle::new((0, 600), (249, 200)), Rectangle::new((249, 600), (249, 200)), Rectangle::new((498, 600), (249, 200)), Rectangle::new((747, 600), (249, 200)), Rectangle::new((996, 600), (249, 200)),
         Rectangle::new((0, 800), (249, 200)), Rectangle::new((249, 800), (249, 200)), Rectangle::new((498, 800), (249, 200)), Rectangle::new((747, 800), (249, 200)), Rectangle::new((996, 800), (249, 200)),
-        ];
+    ];
 
     animation_positions.truncate(5 * rows);
 
-        let character_image = Image::load(file_name).map(move |character_image| {
-            Animation::from_spritesheet(character_image.to_owned(), animation_positions, 4)
-        });
-        Asset::new(character_image)
+    let character_image = Image::load(file_name).map(move |character_image| {
+        Animation::from_spritesheet(character_image.to_owned(), animation_positions, 4)
+    });
+    Asset::new(character_image)
 }
 
 impl State for KaijuEngine {
@@ -95,7 +95,7 @@ impl State for KaijuEngine {
             city_background,
             sky_background,
             monster,
-            building,
+            buildings: vec![building],
         })
     }
 
@@ -111,8 +111,10 @@ impl State for KaijuEngine {
         } else if window.keyboard()[Key::Space].is_down() {
             let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
             // maybe just use contains?
-            if self.building.splash_area.overlaps(&monster_rect) {
-                self.building.position.y += 1.5;
+            for building in &mut self.buildings {
+                if building.splash_area.overlaps(&monster_rect) {
+                    building.position.y += 1.5;
+                }
             }
             self.monster.state = MonsterState::Attack;
         } else {
@@ -139,23 +141,25 @@ impl State for KaijuEngine {
         })?;
 
 
-        let building_position = self.building.position;
-        let pos_y = self.building.position.y;
-        let frequency = 0.5;
-        let rotate = ((pos_y - 450.0) * frequency).sin() * 2.0;
+        for building in &mut self.buildings {
+            let building_position = building.position;
+            let pos_y = building.position.y;
+            let frequency = 0.5;
+            let rotate = ((pos_y - 450.0) * frequency).sin() * 2.0;
 
-        // let splash_area = self.building.splash_area;
-        // window.draw_ex(&splash_area, Background::Col(Color::BLUE), Transform::IDENTITY, 100);
-        // let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
-        //window.draw_ex(&monster_rect, Background::Col(Color::GREEN), Transform::IDENTITY, 100);
+            // let splash_area = self.building.splash_area;
+            // window.draw_ex(&splash_area, Background::Col(Color::BLUE), Transform::IDENTITY, 100);
+            // let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
+            //window.draw_ex(&monster_rect, Background::Col(Color::GREEN), Transform::IDENTITY, 100);
 
-        
-        self.building.image.execute(|image| {
-            window.draw_ex(&image.area().with_center(building_position), Img(&image),
-                           Transform::rotate(rotate),
-            1);
-            Ok(())
-        })?;
+
+            building.image.execute(|image| {
+                window.draw_ex(&image.area().with_center(building_position), Img(&image),
+                               Transform::rotate(rotate),
+                               1);
+                Ok(())
+            })?;
+        }
 
         let animation = match self.monster.state {
             MonsterState::Idle => &mut self.monster.idle_animation,
