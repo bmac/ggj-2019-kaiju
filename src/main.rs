@@ -18,14 +18,16 @@ enum MonsterState {
     // An `enum` may either be `unit-like`,
     Walking,
     Idle,
+    Attack,
 }
 
 struct Monster {
-    walking_animation: Asset<Animation>, // an image asset isn't state, but it does need to persist
-    idle_animation: Asset<Animation>, // an image asset isn't state, but it does need to persist
+    walking_animation: Asset<Animation>,
+    idle_animation: Asset<Animation>,
+    attack_animation: Asset<Animation>,
     state: MonsterState,
-    position: Vector, // We need to store the position as state
-    facing: f32,
+    position: Vector,
+    facing: f32, // 1 or -1 so we can easily pass to scale
 }
 
 
@@ -63,6 +65,7 @@ impl State for KaijuEngine {
         let monster = Monster {
             walking_animation: create_animation_asset("monster_2_youngster_green_walk.png", 3),
             idle_animation: create_animation_asset("monster_2_youngster_green_idle.png", 5),
+            attack_animation: create_animation_asset("monster_2_youngster_green_attack.png", 3),
             state: MonsterState::Idle,
             position: Vector::new(50, 500),
             facing: 1.0,
@@ -82,6 +85,8 @@ impl State for KaijuEngine {
             self.monster.position.x -= 2.5;
             self.monster.facing = 1.0;
             self.monster.state = MonsterState::Walking;
+        } else if window.keyboard()[Key::Space].is_down() {
+            self.monster.state = MonsterState::Attack;
         } else {
             self.monster.state = MonsterState::Idle;
         }
@@ -98,6 +103,7 @@ impl State for KaijuEngine {
         let animation = match self.monster.state {
             MonsterState::Idle => &mut self.monster.idle_animation,
             MonsterState::Walking => &mut self.monster.walking_animation,
+            MonsterState::Attack => &mut self.monster.attack_animation,
         };
 
         animation.execute(|character_animation| {
