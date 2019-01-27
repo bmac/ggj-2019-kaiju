@@ -184,5 +184,8 @@ impl State for KaijuEngine {
 }
 
 fn main() {
-    run::<KaijuEngine>("Kaiju Homes", Vector::new(800, 600), Settings::default());
+    run::<KaijuEngine>("Kaiju Homes", Vector::new(800, 600), Settings {
+        icon_path: Some("favicon.png"),
+        ..Settings::default()
+    });
 }
