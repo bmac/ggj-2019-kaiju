@@ -5,7 +5,7 @@ use std::f32;
 use quicksilver::{
     Future,
     Result,
-    geom::{Shape, Vector, Rectangle, Transform},
+    geom::{Shape, Vector, Rectangle, Transform, Scalar},
     graphics::{Background, Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
     lifecycle::{Asset, Settings, State, Window, run}, // To load anything, we need Asset
     input::Key,
@@ -28,7 +28,20 @@ enum MonsterState {
 struct Building {
     image: Asset<Image>,
     position: Vector,
+    start_position: Vector,
     splash_area: Rectangle,
+}
+
+impl Building {
+    fn new(file_name: &'static str, position: (impl Scalar, impl Scalar)) -> Building {
+        let splash_zone = (50, 300);
+        Building {
+            image: Asset::new(Image::load(file_name)),
+            start_position: Vector::new(position.0, position.1),
+            position: Vector::new(position.0, position.1),
+            splash_area: Rectangle::new_sized(splash_zone).with_center(position)
+        }
+    }
 }
 
 struct Monster {
@@ -84,18 +97,23 @@ impl State for KaijuEngine {
         let sky_background = Asset::new(Image::load("sky.png"));
         let city_background = Asset::new(Image::load("city_background.png"));
 
-        let image = Asset::new(Image::load("building_1.png"));
-        let building = Building {
-            image,
-            position: Vector::new(200, 450),
-            splash_area: Rectangle::new_sized((200, 300)).with_center((200, 450))
-        };
+        let buildings = vec![
+            Building::new("building_1.png", (200, 450)),
+            Building::new("building_2.png", (300, 550)),
+            Building::new("building_3.png", (400, 550)),
+            Building::new("building_4.png", (500, 550)),
+            Building::new("building_5.png", (600, 550)),
+            Building::new("building_6.png", (700, 550)),
+            Building::new("building_7.png", (800, 550)),
+            Building::new("building_8.png", (900, 550)),
+            Building::new("building_9.png", (1000, 550)),
+        ];
 
         Ok(KaijuEngine {
             city_background,
             sky_background,
             monster,
-            buildings: vec![building],
+            buildings,
         })
     }
 
@@ -145,13 +163,8 @@ impl State for KaijuEngine {
             let building_position = building.position;
             let pos_y = building.position.y;
             let frequency = 0.5;
-            let rotate = ((pos_y - 450.0) * frequency).sin() * 2.0;
-
-            // let splash_area = self.building.splash_area;
-            // window.draw_ex(&splash_area, Background::Col(Color::BLUE), Transform::IDENTITY, 100);
-            // let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
-            //window.draw_ex(&monster_rect, Background::Col(Color::GREEN), Transform::IDENTITY, 100);
-
+            let start_height = building.start_position.y;
+            let rotate = ((pos_y - start_height) * frequency).sin() * 2.0;
 
             building.image.execute(|image| {
                 window.draw_ex(&image.area().with_center(building_position), Img(&image),
