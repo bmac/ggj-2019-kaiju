@@ -55,17 +55,7 @@ struct Monster {
 
 
 fn create_animation_asset(file_name: &'static str, rows: usize) -> Asset<Animation> {
-    // x, y
-    // let animation_positions = vec![
-    //     Rectangle::new((0, 0), (743, 596)), Rectangle::new((743, 0), (743, 596)), Rectangle::new((1486, 0), (743, 596)), Rectangle::new((2229, 0), (743, 596)), Rectangle::new((2972, 0), (743, 596)),
-    // Rectangle::new((0, 596), (743, 596)), Rectangle::new((743, 596), (743, 596)), Rectangle::new((1486, 596), (743, 596)), Rectangle::new((2229, 596), (743, 596)), Rectangle::new((2972, 596), (743, 596)),
-    // Rectangle::new((0, 1192), (743, 596)), Rectangle::new((743, 1192), (743, 596)), Rectangle::new((1486, 1192), (743, 596)), Rectangle::new((2229, 1192), (743, 596)), Rectangle::new((2972, 1192), (743, 596))
-    // ];
 
-
-    // 249
-    // 249 + 249 = 498 + 249 = 747 + 249 = 996
-    // height 200
     let mut animation_positions = vec![
         Rectangle::new((0, 0), (249, 200)), Rectangle::new((249, 0), (249, 200)), Rectangle::new((498, 0), (249, 200)), Rectangle::new((747, 0), (249, 200)), Rectangle::new((996, 0), (249, 200)),
         Rectangle::new((0, 200), (249, 200)), Rectangle::new((249, 200), (249, 200)), Rectangle::new((498, 200), (249, 200)), Rectangle::new((747, 200), (249, 200)), Rectangle::new((996, 200), (249, 200)),
@@ -90,7 +80,7 @@ impl State for KaijuEngine {
             idle_animation: create_animation_asset("monster_2_youngster_green_idle.png", 5),
             attack_animation: create_animation_asset("monster_2_youngster_green_attack.png", 3),
             state: MonsterState::Idle,
-            position: Vector::new(50, 500),
+            position: Vector::new(50, 520),
             facing: 1.0,
         };
 
@@ -99,14 +89,14 @@ impl State for KaijuEngine {
 
         let buildings = vec![
             Building::new("building_1.png", (200, 450)),
-            Building::new("building_2.png", (300, 550)),
-            Building::new("building_3.png", (400, 550)),
-            Building::new("building_4.png", (500, 550)),
-            Building::new("building_5.png", (600, 550)),
-            Building::new("building_6.png", (700, 550)),
-            Building::new("building_7.png", (800, 550)),
-            Building::new("building_8.png", (900, 550)),
-            Building::new("building_9.png", (1000, 550)),
+            Building::new("building_2.png", (280, 525)),
+            Building::new("building_3.png", (360, 500)),
+            Building::new("building_4.png", (440, 510)),
+            Building::new("building_5.png", (520, 550)),
+            Building::new("building_6.png", (600, 570)),
+            Building::new("building_7.png", (680, 550)),
+            Building::new("building_8.png", (760, 560)),
+            Building::new("building_9.png", (840, 500)),
         ];
 
         Ok(KaijuEngine {
