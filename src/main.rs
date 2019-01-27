@@ -6,7 +6,7 @@ use quicksilver::{
     Future,
     Result,
     geom::{Shape, Vector, Rectangle, Transform, Scalar},
-    graphics::{Background, Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
+    graphics::{Background::Img, Color, Image, Animation}, // We need Image and image backgrounds
     lifecycle::{Asset, Settings, State, Window, run}, // To load anything, we need Asset
     input::Key,
 };
@@ -16,6 +16,43 @@ struct KaijuEngine {
     city_background: Asset<Image>,
     buildings: Vec<Building>,
     monster: Monster,
+}
+
+impl KaijuEngine {
+    fn render_buildings(&mut self, window: &mut Window) -> Result<()> {
+        for building in &mut self.buildings {
+            let building_position = building.position;
+            let pos_y = building.position.y;
+            let frequency = 0.5;
+            let start_height = building.start_position.y;
+            let rotate = ((pos_y - start_height) * frequency).sin() * 2.0;
+
+            building.image.execute(|image| {
+                window.draw_ex(&image.area().with_center(building_position), Img(&image),
+                               Transform::rotate(rotate),
+                               10);
+                Ok(())
+            })?;
+        }
+
+        Ok(())
+    }
+
+
+    fn render_background(&mut self, window: &mut Window) -> Result<()> {
+
+        self.sky_background.execute(|bg_image| {
+            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
+            Ok(())
+        })?;
+
+        self.city_background.execute(|bg_image| {
+            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
+            Ok(())
+        })?;
+
+        Ok(())
+    }
 }
 
 enum MonsterState {
@@ -51,6 +88,31 @@ struct Monster {
     state: MonsterState,
     position: Vector,
     facing: f32, // 1 or -1 so we can easily pass to scale
+}
+
+impl Monster {
+    fn render(&mut self, window: &mut Window) -> Result<()> {
+        let position = self.position;
+        let facing = self.facing;
+
+        // move to monster render method
+        let animation = match self.state {
+            MonsterState::Idle => &mut self.idle_animation,
+            MonsterState::Walking => &mut self.walking_animation,
+            MonsterState::Attack => &mut self.attack_animation,
+        };
+
+        animation.execute(|character_animation| {
+            let current_frame = character_animation.current_frame();
+            window.draw_ex(
+                &current_frame.area().with_center(position),
+                Img(&current_frame),
+                Transform::scale((facing, 1.0)),
+                100);
+            character_animation.tick();
+            Ok(())
+        })
+    }
 }
 
 
@@ -135,51 +197,12 @@ impl State for KaijuEngine {
 
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         window.clear(Color::WHITE)?;
-        let position = self.monster.position;
-        let facing = self.monster.facing;
 
-        self.sky_background.execute(|bg_image| {
-            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
-            Ok(())
-        })?;
+        self.render_background(window)?;
 
-        self.city_background.execute(|bg_image| {
-            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
-            Ok(())
-        })?;
+        self.render_buildings(window)?;
 
-
-        for building in &mut self.buildings {
-            let building_position = building.position;
-            let pos_y = building.position.y;
-            let frequency = 0.5;
-            let start_height = building.start_position.y;
-            let rotate = ((pos_y - start_height) * frequency).sin() * 2.0;
-
-            building.image.execute(|image| {
-                window.draw_ex(&image.area().with_center(building_position), Img(&image),
-                               Transform::rotate(rotate),
-                               1);
-                Ok(())
-            })?;
-        }
-
-        let animation = match self.monster.state {
-            MonsterState::Idle => &mut self.monster.idle_animation,
-            MonsterState::Walking => &mut self.monster.walking_animation,
-            MonsterState::Attack => &mut self.monster.attack_animation,
-        };
-
-        animation.execute(|character_animation| {
-            let current_frame = character_animation.current_frame();
-            window.draw_ex(
-                &current_frame.area().with_center(position),
-                Img(&current_frame),
-                Transform::scale((facing, 1.0)),
-                10);
-            character_animation.tick();
-            Ok(())
-        })
+        self.monster.render(window)
     }
 }
 
