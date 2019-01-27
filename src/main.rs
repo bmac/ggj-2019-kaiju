@@ -11,6 +11,8 @@ use quicksilver::{
 };
 
 struct KaijuEngine {
+    sky_background: Asset<Image>,
+    city_background: Asset<Image>,
     monster: Monster,
 }
 
@@ -71,8 +73,13 @@ impl State for KaijuEngine {
             facing: 1.0,
         };
 
+        let sky_background = Asset::new(Image::load("sky.png"));
+        let city_background = Asset::new(Image::load("city_background.png"));
+
         Ok(KaijuEngine {
-            monster
+            city_background,
+            sky_background,
+            monster,
         })
     }
 
@@ -100,6 +107,16 @@ impl State for KaijuEngine {
         let position = self.monster.position;
         let facing = self.monster.facing;
 
+        self.sky_background.execute(|bg_image| {
+            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
+            Ok(())
+        })?;
+
+        self.city_background.execute(|bg_image| {
+            window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
+            Ok(())
+        })?;
+
         let animation = match self.monster.state {
             MonsterState::Idle => &mut self.monster.idle_animation,
             MonsterState::Walking => &mut self.monster.walking_animation,
@@ -112,7 +129,7 @@ impl State for KaijuEngine {
                 &current_frame.area().with_center(position),
                 Img(&current_frame),
                 Transform::scale((facing, 1.0)),
-                1);
+                10);
             character_animation.tick();
             Ok(())
         })
