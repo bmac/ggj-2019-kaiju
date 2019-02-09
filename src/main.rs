@@ -4,8 +4,8 @@ extern crate quicksilver;
 use quicksilver::{
     geom::{Rectangle, Shape, Transform, Vector},
     graphics::{Background::Img, Color, Image}, // We need Image and image backgrounds
-    input::Key,
-    lifecycle::{run, Asset, Settings, State, Window}, // To load anything, we need Asset
+    input::{Key, ButtonState},
+    lifecycle::{run, Asset, Settings, State, Window, Event}, // To load anything, we need Asset
     Result,
 };
 
@@ -22,6 +22,7 @@ struct KaijuEngine {
     city_background: Asset<Image>,
     buildings: Vec<Building>,
     monster: Monster,
+    mouse_down: bool,
 }
 
 impl KaijuEngine {
@@ -93,11 +94,42 @@ impl State for KaijuEngine {
             sky_background,
             monster,
             buildings,
+            mouse_down: false,
         })
     }
 
+    fn event(&mut self, event: &Event, _window: &mut Window) -> Result<()> {
+        if let Event::MouseButton(_button, ButtonState::Pressed) = event {
+            self.mouse_down = true;
+        }
+        if let Event::MouseButton(_button, ButtonState::Released) = event {
+            self.mouse_down = false;
+        }
+        Ok(())
+    }
+
     fn update(&mut self, window: &mut Window) -> Result<()> {
-        if window.keyboard()[Key::Right].is_down() {
+        if self.mouse_down {
+            let direction = self.monster.mouse_direction(window.mouse().pos());
+            if direction == 1 {
+                self.monster.position.x += 2.5;
+                self.monster.facing = -1.0;
+                self.monster.state = MonsterState::Walking;
+            } else if direction == -1 {
+                self.monster.position.x -= 2.5;
+                self.monster.facing = 1.0;
+                self.monster.state = MonsterState::Walking;
+            } else {
+                let monster_rect = Rectangle::new_sized((249, 200)).with_center(self.monster.position);
+                // maybe just use contains?
+                for building in &mut self.buildings {
+                    if building.splash_area.overlaps(&monster_rect) {
+                        building.position.y += 1.5;
+                    }
+                }
+                self.monster.state = MonsterState::Attack;
+            }
+        } else if window.keyboard()[Key::Right].is_down() {
             self.monster.position.x += 2.5;
             self.monster.facing = -1.0;
             self.monster.state = MonsterState::Walking;

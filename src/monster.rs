@@ -45,4 +45,17 @@ impl Monster {
             Ok(())
         })
     }
+
+    pub fn mouse_direction(&self, pos: Vector) -> i32 {
+        let dead_zone = 10.0;
+        if pos.x > (self.position.x + dead_zone) {
+            return 1;
+        }
+
+        if pos.x < (self.position.x - dead_zone) {
+            return -1;
+        }
+
+        return 0;
+    }
 }
