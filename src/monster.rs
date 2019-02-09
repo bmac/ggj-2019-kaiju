@@ -1,8 +1,8 @@
 use quicksilver::{
+    geom::{Shape, Transform, Vector},
+    graphics::{Animation, Background::Img}, // We need Image and image backgrounds
+    lifecycle::{Asset, Window},             // To load anything, we need Asset
     Result,
-    geom::{Shape, Vector, Transform},
-    graphics::{Background::Img, Animation}, // We need Image and image backgrounds
-    lifecycle::{Asset, Window}, // To load anything, we need Asset
 };
 
 pub enum MonsterState {
@@ -39,7 +39,8 @@ impl Monster {
                 &current_frame.area().with_center(position),
                 Img(&current_frame),
                 Transform::scale((facing, 1.0)),
-                100);
+                100,
+            );
             character_animation.tick();
             Ok(())
         })

@@ -1,9 +1,8 @@
 use quicksilver::{
-    geom::{Vector, Scalar, Rectangle, Shape},
-    lifecycle::{Asset}, // To load anything, we need Asset
-    graphics::{Image}, // We need Image and image backgrounds
+    geom::{Rectangle, Scalar, Shape, Vector},
+    graphics::Image,  // We need Image and image backgrounds
+    lifecycle::Asset, // To load anything, we need Asset
 };
-
 
 pub struct Building {
     pub image: Asset<Image>,
@@ -19,7 +18,7 @@ impl Building {
             image: Asset::new(Image::load(file_name)),
             start_position: Vector::new(position.0, position.1),
             position: Vector::new(position.0, position.1),
-            splash_area: Rectangle::new_sized(splash_zone).with_center(position)
+            splash_area: Rectangle::new_sized(splash_zone).with_center(position),
         }
     }
 }

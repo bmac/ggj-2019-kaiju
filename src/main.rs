@@ -2,21 +2,20 @@
 extern crate quicksilver;
 
 use quicksilver::{
-    Result,
-    geom::{Shape, Vector, Rectangle, Transform},
+    geom::{Rectangle, Shape, Transform, Vector},
     graphics::{Background::Img, Color, Image}, // We need Image and image backgrounds
-    lifecycle::{Asset, Settings, State, Window, run}, // To load anything, we need Asset
     input::Key,
+    lifecycle::{run, Asset, Settings, State, Window}, // To load anything, we need Asset
+    Result,
 };
 
-mod monster;
 mod building;
+mod monster;
 mod util;
 
-use monster::{MonsterState, Monster};
-use building::{Building};
-use util::{create_animation_asset};
-
+use building::Building;
+use monster::{Monster, MonsterState};
+use util::create_animation_asset;
 
 struct KaijuEngine {
     sky_background: Asset<Image>,
@@ -35,9 +34,12 @@ impl KaijuEngine {
             let rotate = ((pos_y - start_height) * frequency).sin() * 2.0;
 
             building.image.execute(|image| {
-                window.draw_ex(&image.area().with_center(building_position), Img(&image),
-                               Transform::rotate(rotate),
-                               10);
+                window.draw_ex(
+                    &image.area().with_center(building_position),
+                    Img(&image),
+                    Transform::rotate(rotate),
+                    10,
+                );
                 Ok(())
             })?;
         }
@@ -45,9 +47,7 @@ impl KaijuEngine {
         Ok(())
     }
 
-
     fn render_background(&mut self, window: &mut Window) -> Result<()> {
-
         self.sky_background.execute(|bg_image| {
             window.draw(&bg_image.area().with_center((400, 300)), Img(&bg_image));
             Ok(())
@@ -64,7 +64,6 @@ impl KaijuEngine {
 
 impl State for KaijuEngine {
     fn new() -> Result<KaijuEngine> {
-
         let monster = Monster {
             walking_animation: create_animation_asset("monster_2_youngster_green_walk.png", 3),
             idle_animation: create_animation_asset("monster_2_youngster_green_idle.png", 5),
@@ -122,7 +121,6 @@ impl State for KaijuEngine {
         Ok(())
     }
 
-
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         window.clear(Color::WHITE)?;
 
@@ -135,8 +133,12 @@ impl State for KaijuEngine {
 }
 
 fn main() {
-    run::<KaijuEngine>("Kaiju Homes", Vector::new(800, 600), Settings {
-        icon_path: Some("favicon.png"),
-        ..Settings::default()
-    });
+    run::<KaijuEngine>(
+        "Kaiju Homes",
+        Vector::new(800, 600),
+        Settings {
+            icon_path: Some("favicon.png"),
+            ..Settings::default()
+        },
+    );
 }
